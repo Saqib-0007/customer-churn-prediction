@@ -1,7 +1,14 @@
 import streamlit as st
 import joblib
 import pandas as pd
+
 from database.db import engine
+
+# comment out false for mysql but then it will run locally
+USE_MYSQL = True
+USE_MYSQL = False
+
+
 
 # -----------------------------------
 # Page Configuration
@@ -32,10 +39,37 @@ def load_model():
 # Load Data
 # -----------------------------------
 
+# @st.cache_data
+# def load_data():
+#     original_df = pd.read_sql("SELECT * FROM customers", engine)
+#     processed_df = pd.read_sql("SELECT * FROM processed_customers", engine)
+#     return original_df, processed_df
+
 @st.cache_data
 def load_data():
-    original_df = pd.read_sql("SELECT * FROM customers", engine)
-    processed_df = pd.read_sql("SELECT * FROM processed_customers", engine)
+
+    if USE_MYSQL:
+
+        original_df = pd.read_sql(
+            "SELECT * FROM customers",
+            engine
+        )
+
+        processed_df = pd.read_sql(
+            "SELECT * FROM processed_customers",
+            engine
+        )
+
+    else:
+
+        original_df = pd.read_csv(
+            "data/customer_churn.csv"
+        )
+
+        processed_df = pd.read_csv(
+            "data/customer_churn_processed.csv"
+        )
+
     return original_df, processed_df
 
 model = load_model()
@@ -98,11 +132,27 @@ if customer_id:
 
     else:
 
-        customer = customer.reset_index(drop=True)
+        # customer = customer.reset_index(drop=True)
 
-        processed_customer = processed_df[
-            processed_df["customerID"] == customer_id
-        ].drop(columns=["customerID"])
+        # processed_customer = processed_df[
+        #     processed_df["customerID"] == customer_id
+        # ].drop(columns=["customerID"])
+        
+        if USE_MYSQL:
+
+            customer = customer.reset_index(drop=True)
+
+            processed_customer = processed_df[
+                processed_df["customerID"] == customer_id
+            ].drop(columns=["customerID"])
+
+        else:
+
+            original_index = customer.index[0]
+
+            customer = customer.reset_index(drop=True)
+
+            processed_customer = processed_df.iloc[[original_index]].drop(columns=["customerID"])
 
         senior = (
             "Yes"
