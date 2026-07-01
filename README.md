@@ -137,12 +137,6 @@ customer-churn-prediction/
 
 ---
 
-## 📸 Screenshots
-
-Add screenshots of:
-
----
-
 # 📸 Application Screenshots
 
 ## Dashboard
